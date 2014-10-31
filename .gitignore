@@ -1,0 +1,7 @@
+myvenv
+__pycache__
+staticfiles
+*.pyc
+local_settings.py
+db.sqlite3
+.env
