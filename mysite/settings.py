@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+	'cheevo',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -115,3 +116,8 @@ STATICFILES_FINDERS = (
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 DEBUG = False
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
