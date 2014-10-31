@@ -1,0 +1,12 @@
+{% extends 'cheevo/base.html' %}
+
+{% block content %}
+	<div class="date">
+		{% if steam_user.latest_refresh_date %}
+			{{ steam_user.latest_refresh_date }}
+		{% endif %}
+	</div>
+
+	<h1>{{ steam_user.nickname }}</h1>
+
+{% endblock content %}
