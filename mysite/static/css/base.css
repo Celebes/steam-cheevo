@@ -26,17 +26,17 @@ h1, h2, h3, h4 {
     font-family: 'Lobster', cursive;
 }
 
-.date {
-    float: right;
-    color: #828282;
-}
-
 .save {
-    float: right;
+	font-size: 16pt;
+	font-family: 'Lobster', cursive;
 }
 
 .post-form textarea, .post-form input {
     width: 100%;
+}
+
+.post-form {
+	overflow: auto;
 }
 
 .top-menu, .top-menu:hover, .top-menu:visited {
@@ -44,4 +44,53 @@ h1, h2, h3, h4 {
     float: right;
     font-size: 26pt;
     margin-right: 20px;
+}
+
+#player-info a {
+	text-decoration: none;
+	color: inherit;
+}
+
+#player-info a:hover {
+	color: #ff9400;
+}
+
+#date {
+	text-align: center;
+	color: #828282;
+	margin-bottom: 20px;
+}
+
+#player-info {
+	overflow: auto;
+	margin-bottom: 20px;
+	text-align: center;
+	margin-top: 0px;
+}
+
+#player-info h1 {
+	margin-top: 0px;
+}
+
+#game-list ul {
+	list-style-type: none;
+	width: 100%;
+}
+
+#game-list li {
+	padding: 10px;
+	overflow: auto;
+}
+
+#game-list li img {
+	float: left;
+	margin: 0 15px 0 0;
+}
+
+#id_username {
+	width: 100%;
+}
+
+#id_password {
+	width: 100%;
 }

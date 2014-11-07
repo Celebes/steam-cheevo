@@ -18,7 +18,15 @@
 		
 		<div class="page-header">
 			<h1><a href="/">Steam Cheevo!</a></h1>
-			<p>Sort your steam games by their achievements difficulty.</p>
+			<p>Sort your Steam games by their achievements difficulty.</p>
+			{% if user.is_authenticated %}
+			<h1 style="font-size: 32px;">
+				Admin as fuck, 
+				<a href="{% url 'django.contrib.auth.views.logout' %}"><span style="color: red; font-size: 32px;">Log out</span></a>
+				 or view 
+				<a href="{% url 'cheevo.views.all_games_list' %}"><span style="color: red; font-size: 32px;">Games List</span></a>
+			</h1>
+			{% endif %}
 		</div>
 		
 		<div class="content">

@@ -1,12 +1,31 @@
 {% extends 'cheevo/base.html' %}
 
 {% block content %}
-	<div class="date">
+	
+	<div id="player-info">
+		<h1>Hello,<br/> <span style="font-size: 72px"><a href="http://steamcommunity.com/id/{{ steam_user.nickname }}">{{ steam_user.nickname }}</a>!</span></h1>
+	</div>
+	
+	<div id="date">
 		{% if steam_user.latest_refresh_date %}
-			{{ steam_user.latest_refresh_date }}
+			This profile has been updated {{ minutes|floatformat:"0" }} minutes ago.
+			<br/>
+			You can update your profile once an hour.
 		{% endif %}
 	</div>
 
-	<h1>{{ steam_user.nickname }}</h1>
+	<div id="game-list">
+		<ul>
+			{% for game in games %}
+				
+				<li>
+					<img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{ game.appid }}/{{ game.img_icon_url }}.jpg">
+					<a href="https://steamcommunity.com/stats/{{ game.appid }}/achievements/"><p>{{ game.title }} | {{ game.appid }}</p></a>
+					<p>{{ game.difficulty_score }}</p>
+					
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
 
 {% endblock content %}

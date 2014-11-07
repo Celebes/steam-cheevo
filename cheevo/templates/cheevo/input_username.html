@@ -3,6 +3,14 @@
 {% block content %}
 	<form method="POST" class="post-form">{% csrf_token %}
 		{{ form.as_p }}
-		<button type="submit" class="save btn btn-default">Confirm</button>
+		<div style="text-align: center;">
+			<button type="submit" class="btn save btn-default btn-lg">Confirm <span class="glyphicon glyphicon-ok"></span></button>
+		</div>
 	</form>
+	
+	<div id="date" style="margin-top: 25px;">
+		There are currently <strong>{{ games_count }}</strong> games and <strong>{{ achievements_count }}</strong> achievements in the database.
+		<br/>
+		Database is scheduled to update once a week on Mondays.
+	</div>
 {% endblock content %}

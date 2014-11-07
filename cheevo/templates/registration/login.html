@@ -1,0 +1,30 @@
+{% extends "cheevo/base.html" %}
+
+{% block content %}
+
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+<div style="text-align: center; margin-bottom: 25px;">
+	<h1>You dirty hacker scum! You weren't supposed to be able to get here, you know?</h1>
+</div>
+
+<div style="height: auto; margin: 0 auto;">
+	<form method="post" action="{% url 'django.contrib.auth.views.login' %}" style="width: 50%; margin: 0 auto;">
+	{% csrf_token %}
+
+		<div style="width: 100%;">{{ form.username.label_tag }}</div>
+
+		<div style="width: 100%;">{{ form.username }}</div>
+
+		<div style="width: 100%;">{{ form.password.label_tag }}</div>
+
+		<div style="width: 100%;">{{ form.password }}</div>
+
+	<input type="submit" value="login" style="width: 100%;"/>
+	<input type="hidden" name="next" value="{{ next }}" />
+	</form>
+</div>
+
+{% endblock %}
