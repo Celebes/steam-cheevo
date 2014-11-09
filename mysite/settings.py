@@ -125,6 +125,7 @@ except ImportError:
 LOGIN_REDIRECT_URL = '/'
 
 import datetime
+import sys
 
 now = datetime.datetime.now()
 log_file_name = './logs/' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.log'
@@ -162,12 +163,13 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+			'stream': sys.stdout,
             'formatter': 'verbose'
         }
     },
     'loggers': {
         'cheevo': {
-            'handlers': ['console', 'logfile'],
+            'handlers': ['console'],
             'level': 'DEBUG',
         }
     }
