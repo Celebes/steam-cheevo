@@ -1,9 +1,18 @@
 {% extends 'cheevo/base.html' %}
 
 {% block content %}
+	{% if username_error %}
+		<p style="color: red;"><strong>Username "{{ inputted_nickname }}" not found.</strong></p>
+	{% endif %}
+	
 	<form method="POST" class="post-form">{% csrf_token %}
-		{{ form.as_p }}
-		<div style="text-align: center;">
+		<p style="color: red;"><strong>{{ form.non_field_errors }}</strong></p>
+		<div class="fieldWrapper">
+			<p style="color: red;"><strong>{{ form.nickname.errors.as_text|slice:"2:" }}</strong></p>
+			<label for="nickname">Input your Steam username:</label>
+			{{ form.nickname }}
+		</div>
+		<div style="text-align: center; margin-top: 10px;">
 			<button type="submit" class="btn save btn-default btn-lg">Confirm <span class="glyphicon glyphicon-ok"></span></button>
 		</div>
 	</form>
@@ -12,5 +21,7 @@
 		There are currently <strong>{{ games_count }}</strong> games and <strong>{{ achievements_count }}</strong> achievements in the database.
 		<br/>
 		Database is scheduled to update once a week on Mondays.
+		<br/>
+		Last successful update: <strong>{{ str_last_update }}</strong>
 	</div>
 {% endblock content %}

@@ -1,8 +1,19 @@
 from django.db import models
 from django.utils import timezone
+from django.core.validators import RegexValidator
 
 class SteamUser(models.Model):
-	nickname = models.CharField(max_length=255)
+	nickname = models.CharField(
+		max_length=255,
+		validators=[
+			RegexValidator(
+				regex='^[A-Za-z0-9\_]+$',
+				message='Steam username can only consist of alphanumeric characters and underscores',
+				code='invalid_username'
+			)
+		]
+	)
+	
 	steam_id = models.CharField(max_length=50, default='0')
 	avatarfull = models.CharField(max_length=255, default='0')
 	latest_refresh_date = models.DateTimeField(default=timezone.now)

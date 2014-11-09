@@ -72,14 +72,20 @@ h1, h2, h3, h4 {
 	margin-top: 0px;
 }
 
-#game-list ul {
-	list-style-type: none;
+#game-list {
 	width: 100%;
 }
 
+#game-list ul {
+	list-style-type: none;
+	width: auto;
+	padding: 0px;
+}
+
 #game-list li {
-	padding: 10px;
+	
 	overflow: auto;
+	margin: 5px;
 }
 
 #game-list li img {
@@ -93,4 +99,37 @@ h1, h2, h3, h4 {
 
 #id_password {
 	width: 100%;
+}
+
+.game-entry {
+	border: 1px solid black;
+	background: #262626;
+	display: flex;
+	align-items: center; /* align vertical */
+	padding: 0px;
+}
+
+.game-entry:hover {
+	background: #1A1A1A;
+}
+
+.game-entry a {
+	padding: 10px;
+	color: #ffffff;
+	text-decoration: none;
+	font-family: 'Lobster', bold;
+	font-size: 14pt;
+	margin: 0px; display: block; width: 100%; height: 100%;
+}
+
+.game-entry a:hover {
+	color: #ff9400;
+	text-decoration: none;
+	font-family: 'Lobster', bold;
+	font-size: 14pt;
+}
+
+.game-entry-wrapper {
+	display: flex;
+	align-items: center; /* align vertical */
 }

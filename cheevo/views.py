@@ -9,7 +9,7 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from datetime import timedelta
 from .forms import UsernameForm
-from .models import SteamUser, SteamGame, GameAchievement
+from .models import SteamUser, SteamGame, GameAchievement, GlobalStats
 
 steam_api_key = 'FAA78102E0EEFF52D4F96CC1F4497EA7'
 steam_nick_to_id_url = 'http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/'
@@ -28,9 +28,13 @@ logging.debug('This message should go to the log file')
 logging.info('So should this')
 logging.warning('And this, too')
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
+logger = logging.getLogger('testlogger')
 
 def input_username(request):
+	username_error = False
+	inputted_nickname = ""
+	
 	if request.method == "POST":
 		form = UsernameForm(request.POST)
 		if form.is_valid():
@@ -55,11 +59,15 @@ def input_username(request):
 					steam_user.save()
 				else:
 					logger.info('user ID not found')
-				
+					print('id not found')
+					
 			else:
 				steam_user = SteamUser.objects.filter(nickname=inputted_nickname)[:1].get()			
 			
-			return redirect('cheevo.views.user_games_list', pk=steam_user.pk)
+			try:
+				return redirect('cheevo.views.user_games_list', pk=steam_user.pk)
+			except UnboundLocalError:
+				username_error = True
 	else:
 		form = UsernameForm()
 		
@@ -67,17 +75,25 @@ def input_username(request):
 	games_count = str(len(list(SteamGame.objects.filter(is_game=True, has_achievements=True))))
 	achievements_count = str(len(list(GameAchievement.objects.all())))
 	
-	return render(request, 'cheevo/input_username.html', {'form': form, 'games_count': games_count, 'achievements_count': achievements_count})
+	try:
+		last_update = GlobalStats.objects.latest('id').last_database_update
+		str_last_update = last_update.strftime("%d-%m-%Y")
+		print(last_update)
+		print(type(last_update))
+	except GlobalStats.DoesNotExist:
+		str_last_update = 'Never.'
+	
+	return render(request, 'cheevo/input_username.html', {'form': form, 'games_count': games_count, 'achievements_count': achievements_count, 'str_last_update': str_last_update, 'username_error': username_error, 'inputted_nickname': inputted_nickname})
 	
 def user_games_list(request, pk):
 	steam_user = get_object_or_404(SteamUser, pk=pk)
 	
-	time_now = timezone.now()
-	time_diff = time_now - steam_user.latest_refresh_date
+	time_diff = timezone.now() - steam_user.latest_refresh_date
 	
-	if time_diff.total_seconds() >= 1:
+	if time_diff.total_seconds() >= 3600:
 		logger.info('odswiezono liste gier uzytkownika!')
 		steam_user.refresh()
+		time_diff = timezone.now() - steam_user.latest_refresh_date
 	
 		steam_owned_games_params = {'key': steam_api_key, 'steamid': steam_user.steam_id, 'format': 'json', 'include_appinfo': '1'}
 		steam_owned_games_result = force_connection(steam_owned_games_url, steam_owned_games_params)
@@ -100,13 +116,14 @@ def user_games_list(request, pk):
 				game_in_db.owners.add(steam_user)
 			
 			# zapisz gre
-			game_in_db.save()		
+			game_in_db.save()
+			
 	else:
 		logger.info('jeszcze tylko' + str(3600 - int(time_diff.total_seconds())) + ' sekund do mozliwosci odswiezenia')
 		
-	owned_games_list_from_db = list(SteamGame.objects.filter(owners__steam_id=steam_user.steam_id, is_game=True, has_achievements=True).order_by('-difficulty_score'))
-	
 	minutes = time_diff.total_seconds() / 60
+		
+	owned_games_list_from_db = list(SteamGame.objects.filter(owners__steam_id=steam_user.steam_id, is_game=True, has_achievements=True).order_by('-difficulty_score'))
 
 	return render(request, 'cheevo/user_games_list.html', {'steam_user': steam_user, 'games': owned_games_list_from_db, 'minutes': minutes})
 

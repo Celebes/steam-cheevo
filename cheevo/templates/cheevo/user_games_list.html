@@ -8,7 +8,11 @@
 	
 	<div id="date">
 		{% if steam_user.latest_refresh_date %}
-			This profile has been updated {{ minutes|floatformat:"0" }} minutes ago.
+			{% if minutes|floatformat:"0" == '0' %}
+				This profile has just been updated.
+			{% else %}
+				This profile has been updated <strong>{{ minutes|floatformat:"0" }}</strong> minutes ago.
+			{% endif %}
 			<br/>
 			You can update your profile once an hour.
 		{% endif %}
@@ -17,12 +21,13 @@
 	<div id="game-list">
 		<ul>
 			{% for game in games %}
-				
-				<li>
-					<img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{ game.appid }}/{{ game.img_icon_url }}.jpg">
-					<a href="https://steamcommunity.com/stats/{{ game.appid }}/achievements/"><p>{{ game.title }} | {{ game.appid }}</p></a>
-					<p>{{ game.difficulty_score }}</p>
-					
+				<li class="game-entry">
+					<a href="https://steamcommunity.com/stats/{{ game.appid }}/achievements/">
+						<div class="game-entry-wrapper">
+							<img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{ game.appid }}/{{ game.img_icon_url }}.jpg">
+							{{ game.title }}
+						</div>
+					</a>
 				</li>
 			{% endfor %}
 		</ul>
