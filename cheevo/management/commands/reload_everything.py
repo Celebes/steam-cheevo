@@ -18,7 +18,7 @@ class Command(BaseCommand):
         cheevo.views.logger.info('******************************************************')
         
         cheevo.views.logger.info('')
-        #cheevo.views.reload_all_games(None)
+        cheevo.views.reload_all_games(None)
         cheevo.views.logger.info('')
         
         cheevo.views.logger.info('******************************************************')
@@ -26,7 +26,7 @@ class Command(BaseCommand):
         cheevo.views.logger.info('******************************************************')
         
         cheevo.views.logger.info('')
-        #cheevo.views.check_if_apps_are_games(None)
+        cheevo.views.check_if_apps_are_games(None)
         cheevo.views.logger.info('')
         
         cheevo.views.logger.info('******************************************************')
@@ -34,7 +34,7 @@ class Command(BaseCommand):
         cheevo.views.logger.info('******************************************************')
         
         cheevo.views.logger.info('')
-        #cheevo.views.reload_all_achievements(None)
+        cheevo.views.reload_all_achievements(None)
         cheevo.views.logger.info('')
         
         cheevo.views.logger.info('******************************************************')
@@ -42,7 +42,7 @@ class Command(BaseCommand):
         cheevo.views.logger.info('******************************************************')
         
         cheevo.views.logger.info('')
-        #cheevo.views.recalculate_difficulties(None)
+        cheevo.views.recalculate_difficulties(None)
         cheevo.views.logger.info('')
         
         cheevo.views.logger.info('******************************************************')

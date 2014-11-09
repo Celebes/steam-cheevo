@@ -163,8 +163,8 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'formatter': 'standard',
 			'stream': sys.stdout,
-            'formatter': 'verbose'
         }
     },
     'loggers': {

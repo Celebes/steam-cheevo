@@ -20,7 +20,6 @@ steam_ach_percent_url = 'http://api.steampowered.com/ISteamUserStats/GetGlobalAc
 steam_game_details_url = 'http://store.steampowered.com/api/appdetails/'
 
 logger = logging.getLogger(__name__)
-logger.debug("test loggera")
 
 def input_username(request):
 	username_error = False
@@ -57,8 +56,9 @@ def input_username(request):
 			try:
 				return redirect('cheevo.views.user_games_list', pk=steam_user.pk)
 			except UnboundLocalError:
-				logger.error('user ID not valid - ' + inputted_nickname)
 				username_error = True
+		else:
+			logger.error('user ID not valid')
 	else:
 		form = UsernameForm()
 		

@@ -16,30 +16,34 @@
 	</head>
 	
 	<body>
-		
-		<div class="page-header">
-			<h1><a href="/">Steam Cheevo!</a></h1>
-			<p>Sort your Steam games by their achievements difficulty</p>
-			{% if user.is_authenticated %}
-			<h1 style="font-size: 32px;">
-				Admin as fuck, 
-				<a href="{% url 'django.contrib.auth.views.logout' %}"><span style="color: red; font-size: 32px;">Log out</span></a>
-				 or view 
-				<a href="{% url 'cheevo.views.all_games_list' %}"><span style="color: red; font-size: 32px;">Games List</span></a>
-			</h1>
-			{% endif %}
-		</div>
-		
-		<div class="content">
-			<div class="row">
-				<div class="col-md-4"></div>
-				<div class="col-md-4">
-					{% block content %}
-					{% endblock content %}
+		<div id="wrapper">
+			<div class="page-header">
+				<h1><a href="/">Steam Cheevo!</a></h1>
+				<p>Sort your Steam games by their achievements difficulty</p>
+				{% if user.is_authenticated %}
+				<h1 style="font-size: 32px;">
+					Admin as fuck, 
+					<a href="{% url 'django.contrib.auth.views.logout' %}"><span style="color: red; font-size: 32px;">Log out</span></a>
+					 or view 
+					<a href="{% url 'cheevo.views.all_games_list' %}"><span style="color: red; font-size: 32px;">Games List</span></a>
+				</h1>
+				{% endif %}
+			</div>
+			
+			<div class="content">
+				<div class="row">
+					<div class="col-md-4"></div>
+					<div class="col-md-4">
+						{% block content %}
+						{% endblock content %}
+					</div>
+					<div class="col-md-4"></div>
 				</div>
-				<div class="col-md-4"></div>
 			</div>
 		</div>
 		
+		<div id="page-footer">
+			<strong>Copyright &copy; 2014 <a href="http://celebes.github.io/">Krzysztof Gurniak</a></strong>
+		</div>
 	</body>
 </html>
