@@ -120,7 +120,8 @@ def user_games_list(request, pk):
 def all_games_list(request):
 	games = SteamGame.objects.all()
 	return render(request, 'cheevo/all_games_list.html', {'games': games})
-	
+
+@login_required	
 def reload_all_games(request):
 	logger.info('reloading all games!')
 
@@ -142,7 +143,7 @@ def reload_all_games(request):
 	
 	return redirect('cheevo.views.all_games_list')
 
-# ta metoda teraz sprawdza tylko czy dane appid jest typu game lub dlc
+@login_required	
 def check_if_apps_are_games(request):
 	logger.info('checking if games have achievements')
 	
@@ -198,7 +199,8 @@ def check_if_apps_are_games(request):
 
 	logger.info('koniec sprawdzanie ktore z gier to gry lub dlc!')
 	return redirect('cheevo.views.all_games_list')
-	
+
+@login_required	
 def reload_all_achievements(request):
 	logger.info('reload all achievements!')
 	
@@ -255,7 +257,8 @@ def reload_all_achievements(request):
 			continue
 	logger.info('pomyslnie zaktualizowano osiagniecia dla ' + all_games_len + ' gier')
 	return redirect('cheevo.views.all_games_list')
-	
+
+@login_required	
 def recalculate_difficulties(request):
 	logger.info('recalculate difficulties!')
 	
@@ -315,7 +318,7 @@ def recalculate_difficulties(request):
 		
 	logger.info('zakonczono przeliczanie trudnosci gier')
 	return redirect('cheevo.views.all_games_list')
-	
+
 def force_connection(url, url_params):
 	result = None
 	
