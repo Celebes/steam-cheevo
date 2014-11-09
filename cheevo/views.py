@@ -19,17 +19,8 @@ steam_all_games_url = 'http://api.steampowered.com/ISteamApps/GetAppList/v2/'
 steam_ach_percent_url = 'http://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/'
 steam_game_details_url = 'http://store.steampowered.com/api/appdetails/'
 
-# logging
-now = datetime.datetime.now()
-log_file_name = './logs/' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '-' + str(now.hour) + '-' + str(now.minute) + '-' + str(now.second) + '.log'
-
-logging.basicConfig(filename=log_file_name, level=logging.INFO)
-logging.debug('This message should go to the log file')
-logging.info('So should this')
-logging.warning('And this, too')
-
-#logger = logging.getLogger(__name__)
-logger = logging.getLogger('testlogger')
+logger = logging.getLogger(__name__)
+logger.debug("test loggera")
 
 def input_username(request):
 	username_error = False
@@ -58,8 +49,7 @@ def input_username(request):
 					steam_user.avatarfull = player_info_result.json()['response']['players'][0]['avatarfull']
 					steam_user.save()
 				else:
-					logger.info('user ID not found')
-					print('id not found')
+					logger.error('user ID not found - ' + inputted_nickname)
 					
 			else:
 				steam_user = SteamUser.objects.filter(nickname=inputted_nickname)[:1].get()			
@@ -67,6 +57,7 @@ def input_username(request):
 			try:
 				return redirect('cheevo.views.user_games_list', pk=steam_user.pk)
 			except UnboundLocalError:
+				logger.error('user ID not valid - ' + inputted_nickname)
 				username_error = True
 	else:
 		form = UsernameForm()
@@ -78,8 +69,6 @@ def input_username(request):
 	try:
 		last_update = GlobalStats.objects.latest('id').last_database_update
 		str_last_update = last_update.strftime("%d-%m-%Y")
-		print(last_update)
-		print(type(last_update))
 	except GlobalStats.DoesNotExist:
 		str_last_update = 'Never.'
 	
@@ -87,7 +76,7 @@ def input_username(request):
 	
 def user_games_list(request, pk):
 	steam_user = get_object_or_404(SteamUser, pk=pk)
-	
+	logger.info('zaladowano liste gier dla uzytkownika: ' + steam_user.nickname)
 	time_diff = timezone.now() - steam_user.latest_refresh_date
 	
 	if time_diff.total_seconds() >= 3600:
@@ -119,7 +108,7 @@ def user_games_list(request, pk):
 			game_in_db.save()
 			
 	else:
-		logger.info('jeszcze tylko' + str(3600 - int(time_diff.total_seconds())) + ' sekund do mozliwosci odswiezenia')
+		logger.info('jeszcze tylko ' + str(3600 - int(time_diff.total_seconds())) + ' sekund do mozliwosci odswiezenia')
 		
 	minutes = time_diff.total_seconds() / 60
 		

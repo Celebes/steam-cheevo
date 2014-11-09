@@ -124,6 +124,11 @@ except ImportError:
 
 LOGIN_REDIRECT_URL = '/'
 
+import datetime
+
+now = datetime.datetime.now()
+log_file_name = './logs/' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.log'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -136,12 +141,23 @@ LOGGING = {
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
-        }
+        },
+		'standard': {
+			'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+			'datefmt' : "%d/%b/%Y %H:%M:%S"
+		},
     },
     'handlers': {
         'null': {
             'level': 'DEBUG',
             'class': 'logging.NullHandler',
+        },
+		'logfile': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': log_file_name,
+            'backupCount': 2,
+            'formatter': 'standard',
         },
         'console': {
             'level': 'DEBUG',
@@ -150,9 +166,9 @@ LOGGING = {
         }
     },
     'loggers': {
-        'testlogger': {
-            'handlers': ['console'],
-            'level': 'INFO',
+        'cheevo': {
+            'handlers': ['console', 'logfile'],
+            'level': 'DEBUG',
         }
     }
 }
