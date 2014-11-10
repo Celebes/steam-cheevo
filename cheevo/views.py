@@ -63,7 +63,7 @@ def input_username(request):
 		form = UsernameForm()
 		
 	# ilosc osiagniec i gier w bazie do wyswietlenia na stronce
-	games_count = str(len(list(SteamGame.objects.filter(is_game=True, has_achievements=True))))
+	games_count = str(len(list(SteamGame.objects.filter(has_achievements=True))))
 	achievements_count = str(len(list(GameAchievement.objects.all())))
 	
 	try:
@@ -77,9 +77,13 @@ def input_username(request):
 def user_games_list(request, pk):
 	steam_user = get_object_or_404(SteamUser, pk=pk)
 	logger.info('zaladowano liste gier dla uzytkownika: ' + steam_user.nickname)
-	time_diff = timezone.now() - steam_user.latest_refresh_date
 	
-	if time_diff.total_seconds() >= 3600:
+	minutes = 0
+	
+	if not steam_user.latest_refresh_date == None:
+		time_diff = timezone.now() - steam_user.latest_refresh_date
+	
+	if steam_user.latest_refresh_date == None or time_diff.total_seconds() >= 3600:
 		logger.info('odswiezono liste gier uzytkownika!')
 		steam_user.refresh()
 		time_diff = timezone.now() - steam_user.latest_refresh_date
@@ -109,10 +113,11 @@ def user_games_list(request, pk):
 			
 	else:
 		logger.info('jeszcze tylko ' + str(3600 - int(time_diff.total_seconds())) + ' sekund do mozliwosci odswiezenia')
+	
+	if not steam_user.latest_refresh_date == None:
+		minutes = time_diff.total_seconds() / 60
 		
-	minutes = time_diff.total_seconds() / 60
-		
-	owned_games_list_from_db = list(SteamGame.objects.filter(owners__steam_id=steam_user.steam_id, is_game=True, has_achievements=True).order_by('-difficulty_score'))
+	owned_games_list_from_db = list(SteamGame.objects.filter(owners__steam_id=steam_user.steam_id, has_achievements=True).order_by('-difficulty_score'))
 
 	return render(request, 'cheevo/user_games_list.html', {'steam_user': steam_user, 'games': owned_games_list_from_db, 'minutes': minutes})
 
@@ -121,7 +126,7 @@ def all_games_list(request):
 	games = SteamGame.objects.all()
 	return render(request, 'cheevo/all_games_list.html', {'games': games})
 
-@login_required	
+#@login_required	
 def reload_all_games(request):
 	logger.info('reloading all games!')
 
@@ -143,7 +148,7 @@ def reload_all_games(request):
 	
 	return redirect('cheevo.views.all_games_list')
 
-@login_required	
+#@login_required	
 def check_if_apps_are_games(request):
 	logger.info('checking if games have achievements')
 	
@@ -154,11 +159,7 @@ def check_if_apps_are_games(request):
 	
 	for steamGame in all_games_from_db:
 		counter += 1
-		#logger.info('sprawdzanie czy appka [' + str(counter) + '/' + all_games_len + '] o appid = ' + str(steamGame.appid) + ' jest gra')
-		
-		if steamGame.is_game == False:
-			#logger.info('BEZ POLACZENIA Z API - to nie gra!')
-			continue
+		logger.info('sprawdzanie czy appka [' + str(counter) + '/' + all_games_len + '] o appid = ' + str(steamGame.appid) + ' jest gra')
 
 		is_success = False	
 		
@@ -179,28 +180,25 @@ def check_if_apps_are_games(request):
 				
 			if is_success == True:
 				if app_type != 'game' and app_type != 'dlc':
-					#logger.info('to nie gra!')
-					steamGame.is_game = False
-					steamGame.save()
+					logger.info('to nie gra!')
+					steamGame.delete()
 					continue
-				#else:
-					#logger.info('to jest gra lub dlc!')
+				else:
+					logger.info('to jest gra lub dlc!')
 		except KeyError:
 			logger.error('KeyError!')
-			steamGame.is_game = False
-			steamGame.save()
+			steamGame.delete()
 			continue
 				
 		if is_success == False:
-			steamGame.is_game = False
-			steamGame.save()
-			#logger.info('success FALSE!')
+			steamGame.delete()
+			logger.info('success FALSE!')
 			continue
-
+	
 	logger.info('koniec sprawdzanie ktore z gier to gry lub dlc!')
 	return redirect('cheevo.views.all_games_list')
 
-@login_required	
+#@login_required	
 def reload_all_achievements(request):
 	logger.info('reload all achievements!')
 	
@@ -211,11 +209,7 @@ def reload_all_achievements(request):
 	
 	for steamGame in all_games_from_db:
 		counter += 1		
-		#logger.info('pobieranie osiagniec dla gry [' + str(counter) + '/' + all_games_len + '] o appid = ' + str(steamGame.appid) + '...')
-		
-		if steamGame.is_game == False:
-			#logger.info('to nie gra!')
-			continue
+		logger.info('pobieranie osiagniec dla gry [' + str(counter) + '/' + all_games_len + '] o appid = ' + str(steamGame.appid) + '...')
 
 		try:
 			# pobierz z api globalne statystyki osiagniec dla danej gry
@@ -234,31 +228,39 @@ def reload_all_achievements(request):
 		
 			# przypisz osiagniecia do gier, o ile juz nie sa przypisane i jesli gra ma osiagniecia
 			if list_of_achievements:
-				for achievement in list_of_achievements:
-					if not GameAchievement.objects.filter(game=steamGame, name=achievement['name']):
-						newAchievement = GameAchievement()
-						newAchievement.game = steamGame
-						newAchievement.name = achievement['name']
-						newAchievement.percentage_of_people_that_unlocked = achievement['percent']
-						newAchievement.save()
-					else:
-						existingAchievement = GameAchievement.objects.filter(game=steamGame, name=achievement['name'])[:1].get()
-						existingAchievement.percentage_of_people_that_unlocked = achievement['percent']
-						existingAchievement.save()
+			
+				min_ach = 100.0
+				below_one_count = 0
 				
+				for achievement in list_of_achievements:
+					curr_percent = float(achievement['percent'])
+					
+					if not 0.01 <= curr_percent <= 100:
+						continue
+						
+					if curr_percent < min_ach:
+						min_ach = curr_percent
+						
+					if curr_percent < 1:
+						below_one_count += 1
+				
+				steamGame.min_achievement = min_ach
+				steamGame.below_one_ach_count = below_one_count
 				steamGame.has_achievements = True
 				steamGame.save()
 					
-				#logger.info('pomyslnie pobrano ' + str(len(steam_ach_percent_result.json()['achievementpercentages']['achievements'])) + ' osiagniec dla gry o appid = ' + str(steamGame.appid))
-			#else:
-				#logger.info('brak osiagniec dla gry o appid = ' + str(steamGame.appid))
+				logger.info('pomyslnie pobrano ' + str(len(steam_ach_percent_result.json()['achievementpercentages']['achievements'])) + ' osiagniec dla gry o appid = ' + str(steamGame.appid))
+			else:
+				logger.info('brak osiagniec dla gry o appid = ' + str(steamGame.appid))
+				steamGame.delete()
 		except KeyError:
-			#logger.info('brak osiagniec dla tej gry o appid = ' + str(steamGame.appid))
+			logger.info('brak osiagniec dla tej gry o appid = ' + str(steamGame.appid))
+			steamGame.delete()
 			continue
 	logger.info('pomyslnie zaktualizowano osiagniecia dla ' + all_games_len + ' gier')
 	return redirect('cheevo.views.all_games_list')
 
-@login_required	
+#@login_required	
 def recalculate_difficulties(request):
 	logger.info('recalculate difficulties!')
 	
@@ -269,52 +271,18 @@ def recalculate_difficulties(request):
 	
 	for steamGame in all_games_from_db:
 		counter += 1
-		#logger.info('obliczanie trudnosci gry o appid = ' + str(steamGame.appid) + '...')
-		
-		if steamGame.is_game == False:
-			#logger.info('to nie gra!')
-			continue
+		logger.info('obliczanie trudnosci gry o appid = ' + str(steamGame.appid) + '...')
 			
 		if steamGame.has_achievements == False:
-			#logger.info('ta gra nie ma osiagniec!')
-			continue
-			
-		steamGameAchievements = GameAchievement.objects.filter(game=steamGame)
-		
-		if not steamGameAchievements:
-			#logger.info('brak achievementow')
+			logger.info('ta gra nie ma osiagniec!')
 			continue
 		
-		percentagesList = []
-		numberOfAchievementsBelowOne = 0
-		try:
-			minPercent = 100
-			
-			for achievement in steamGameAchievements:
-				currentPercent = float(achievement.percentage_of_people_that_unlocked)
-				
-				if not 0.01 <= currentPercent <= 100:
-					continue
-				
-				if currentPercent < 1:
-					numberOfAchievementsBelowOne += 1
-				
-				percentagesList.append(currentPercent)
-				
-				if currentPercent < minPercent:
-					minPercent = currentPercent
-			
-			steamGame.difficulty_score = minPercent
-			
-			if numberOfAchievementsBelowOne > 0:
-				steamGame.difficulty_score /= numberOfAchievementsBelowOne
-			
-			steamGame.save()
-			
-			#logger.info('[' + str(steamGame.appid) + '] Znaleziono ' + str(len(percentagesList)) + ' osiagniec, najtrudniejsze z nich zdobylo ' + str(minPercent) + ' % graczy, trudnosc gry = ' + str(steamGame.difficulty_score))
-		except GameAchievement.DoesNotExist:
-			continue
-			#logger.info('brak osiagniec w bazie, mimo, ze gra miala kategorie 22 = ' + str(steamGame.appid))
+		steamGame.difficulty_score = steamGame.min_achievement
+		
+		if steamGame.below_one_ach_count > 1:
+			steamGame.difficulty_score /= steamGame.below_one_ach_count
+		
+		steamGame.save()
 		
 	logger.info('zakonczono przeliczanie trudnosci gier')
 	return redirect('cheevo.views.all_games_list')

@@ -16,7 +16,7 @@ class SteamUser(models.Model):
 	
 	steam_id = models.CharField(max_length=50, default='0')
 	avatarfull = models.CharField(max_length=255, default='0')
-	latest_refresh_date = models.DateTimeField(default=timezone.now)
+	latest_refresh_date = models.DateTimeField(default=None, blank=True, null=True)
 	
 	def refresh(self):
 		self.latest_refresh_date = timezone.now()
@@ -29,12 +29,14 @@ class SteamGame(models.Model):
 	owners = models.ManyToManyField(SteamUser)
 	
 	has_achievements = models.BooleanField(default=False)
-	is_game = models.BooleanField(default=True)
 	
 	appid = models.IntegerField()
 	title = models.CharField(max_length=255)
 	img_icon_url = models.CharField(max_length=255, default='0')
 	difficulty_score = models.FloatField(default=0.0)
+	
+	min_achievement = models.FloatField(default=0.0)
+	below_one_ach_count = models.IntegerField(default=0)
 	
 	def __str__(self):
 		return self.title + " owned by " + owner

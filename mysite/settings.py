@@ -169,7 +169,7 @@ LOGGING = {
     },
     'loggers': {
         'cheevo': {
-            'handlers': ['console'],
+            'handlers': ['console', 'logfile'],
             'level': 'DEBUG',
         }
     }
