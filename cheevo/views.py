@@ -2,6 +2,7 @@ import requests
 import time
 import logging
 import datetime
+import re
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
@@ -30,28 +31,50 @@ def input_username(request):
 		if form.is_valid():
 			# utworz usera lub pobierz istniejacego z bazy danych
 			inputted_nickname = form.cleaned_data['nickname']
-			if not SteamUser.objects.filter(nickname=inputted_nickname):
 			
-				# pobierz ID usera ze steam API na podstawie nicku
-				nick_to_id_params = {'key': steam_api_key, 'vanityurl': inputted_nickname}
-				nick_to_id_result = requests.get(steam_nick_to_id_url, params=nick_to_id_params)
-				
-				if nick_to_id_result.json()['response']['success'] == 1:
-					user_steam_id = nick_to_id_result.json()['response']['steamid']
-					logger.info('user ID = ' + user_steam_id)
-					
-					player_info_params = {'key': steam_api_key, 'steamids': user_steam_id}
-					player_info_result = force_connection(steam_player_info_url, player_info_params)
-					
-					steam_user = form.save(commit=False)
-					steam_user.steam_id = user_steam_id
-					steam_user.avatarfull = player_info_result.json()['response']['players'][0]['avatarfull']
-					steam_user.save()
+			regexp = re.compile(r'^[0-9]*$')
+			reg_match = False
+			new_user = False
+			
+			if regexp.match(inputted_nickname) is not None:
+				print('wpisano ID!')
+				reg_match = True
+				if not SteamUser.objects.filter(steam_id=inputted_nickname):
+					user_steam_id = inputted_nickname
+					new_user = True
 				else:
-					logger.error('user ID not found - ' + inputted_nickname)
-					
+					steam_user = SteamUser.objects.filter(steam_id=inputted_nickname)[:1].get()
+				
 			else:
-				steam_user = SteamUser.objects.filter(nickname=inputted_nickname)[:1].get()			
+				if not SteamUser.objects.filter(nickname=inputted_nickname):
+					# pobierz ID usera ze steam API na podstawie nicku
+					nick_to_id_params = {'key': steam_api_key, 'vanityurl': inputted_nickname}
+					nick_to_id_result = requests.get(steam_nick_to_id_url, params=nick_to_id_params)
+					
+					if nick_to_id_result.json()['response']['success'] == 1:
+						user_steam_id = nick_to_id_result.json()['response']['steamid']
+						new_user = True
+						logger.info('user ID = ' + user_steam_id)
+					else:
+						logger.error('user ID not found - ' + inputted_nickname)
+						
+				else:
+					steam_user = SteamUser.objects.filter(nickname=inputted_nickname)[:1].get()
+			
+			if new_user == True:
+				player_info_params = {'key': steam_api_key, 'steamids': user_steam_id}
+				player_info_result = force_connection(steam_player_info_url, player_info_params)
+				
+				steam_user = form.save(commit=False)
+				
+				if reg_match == True:
+					steam_user.personaname = player_info_result.json()['response']['players'][0]['personaname']
+				else:
+					steam_user.personaname = inputted_nickname
+				
+				steam_user.steam_id = user_steam_id
+				steam_user.avatarfull = player_info_result.json()['response']['players'][0]['avatarfull']
+				steam_user.save()
 			
 			try:
 				return redirect('cheevo.views.user_games_list', pk=steam_user.pk)
@@ -71,7 +94,7 @@ def input_username(request):
 		str_last_update = last_update.strftime("%d-%m-%Y")
 	except GlobalStats.DoesNotExist:
 		str_last_update = 'Never.'
-	
+
 	return render(request, 'cheevo/input_username.html', {'form': form, 'games_count': games_count, 'achievements_count': achievements_count, 'str_last_update': str_last_update, 'username_error': username_error, 'inputted_nickname': inputted_nickname})
 	
 def user_games_list(request, pk):

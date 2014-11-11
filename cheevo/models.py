@@ -16,6 +16,8 @@ class SteamUser(models.Model):
 	
 	steam_id = models.CharField(max_length=50, default='0')
 	avatarfull = models.CharField(max_length=255, default='0')
+	personaname = models.CharField(max_length=255, default='0')
+	
 	latest_refresh_date = models.DateTimeField(default=None, blank=True, null=True)
 	
 	def refresh(self):

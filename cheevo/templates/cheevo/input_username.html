@@ -9,7 +9,7 @@
 		<p style="color: red;"><strong>{{ form.non_field_errors }}</strong></p>
 		<div class="fieldWrapper">
 			<p style="color: red;"><strong>{{ form.nickname.errors.as_text|slice:"2:" }}</strong></p>
-			<label for="nickname">Input your Steam username:</label>
+			<label for="nickname">Input <a style="text-decoration: none; color: #ff9400; font-weight: 900;" href="http://steamidconverter.com/" title="e.g. 76561198017855478"><u>steamID64</u></a> or your Steam <span id="loginspan" title="e.g. celebezy" style="color: #ff9400; font-weight: 900;"><u>login</u></span>:</label>
 			{{ form.nickname }}
 		</div>
 		<div style="text-align: center; margin-top: 10px;">
@@ -20,7 +20,7 @@
 	<div id="date" style="margin-top: 25px;">
 		There are currently <strong>{{ games_count }}</strong> games in the database.
 		<br/>
-		Last successful database update: <strong>{{ str_last_update }}</strong>
+		Last successful database update: <strong>{{ str_last_update }}</strong>.
 		<br/>
 		Need an update? Let <a style="text-decoration: none; color: inherit;" href="mailto:kris1337@gmail.com?Subject=Please%20update%20the%20Cheevo%20for%20me!"><strong>me</strong></a> know.
 	</div>
