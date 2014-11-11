@@ -11,7 +11,7 @@ from datetime import timedelta
 from .forms import UsernameForm
 from .models import SteamUser, SteamGame, GameAchievement, GlobalStats
 
-steam_api_key = 'FAA78102E0EEFF52D4F96CC1F4497EA7'
+steam_api_key = '23260ACA5F93979697902D234A95E06C'
 steam_nick_to_id_url = 'http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/'
 steam_owned_games_url = 'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/'
 steam_player_info_url = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/'
@@ -126,7 +126,7 @@ def all_games_list(request):
 	games = SteamGame.objects.all()
 	return render(request, 'cheevo/all_games_list.html', {'games': games})
 
-#@login_required	
+@login_required	
 def reload_all_games(request):
 	logger.info('reloading all games!')
 
@@ -148,7 +148,7 @@ def reload_all_games(request):
 	
 	return redirect('cheevo.views.all_games_list')
 
-#@login_required	
+@login_required	
 def check_if_apps_are_games(request):
 	logger.info('checking if games have achievements')
 	
@@ -198,7 +198,7 @@ def check_if_apps_are_games(request):
 	logger.info('koniec sprawdzanie ktore z gier to gry lub dlc!')
 	return redirect('cheevo.views.all_games_list')
 
-#@login_required	
+@login_required	
 def reload_all_achievements(request):
 	logger.info('reload all achievements!')
 	
@@ -260,7 +260,7 @@ def reload_all_achievements(request):
 	logger.info('pomyslnie zaktualizowano osiagniecia dla ' + all_games_len + ' gier')
 	return redirect('cheevo.views.all_games_list')
 
-#@login_required	
+@login_required	
 def recalculate_difficulties(request):
 	logger.info('recalculate difficulties!')
 	
