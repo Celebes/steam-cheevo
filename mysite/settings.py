@@ -115,7 +115,7 @@ STATICFILES_FINDERS = (
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-DEBUG = True
+DEBUG = False
 
 try:
     from .local_settings import *

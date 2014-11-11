@@ -49,7 +49,7 @@ def input_username(request):
 				if not SteamUser.objects.filter(nickname=inputted_nickname):
 					# pobierz ID usera ze steam API na podstawie nicku
 					nick_to_id_params = {'key': steam_api_key, 'vanityurl': inputted_nickname}
-					nick_to_id_result = requests.get(steam_nick_to_id_url, params=nick_to_id_params)
+					nick_to_id_result = force_connection(steam_nick_to_id_url, nick_to_id_params)
 					
 					if nick_to_id_result.json()['response']['success'] == 1:
 						user_steam_id = nick_to_id_result.json()['response']['steamid']
@@ -114,25 +114,29 @@ def user_games_list(request, pk):
 		steam_owned_games_params = {'key': steam_api_key, 'steamid': steam_user.steam_id, 'format': 'json', 'include_appinfo': '1'}
 		steam_owned_games_result = force_connection(steam_owned_games_url, steam_owned_games_params)
 		
-		owned_games_list = steam_owned_games_result.json()['response']['games']
+		try:
+			owned_games_list = steam_owned_games_result.json()['response']['games']
+		except KeyError:
+			owned_games_list = []
 		
-		for game in owned_games_list:
-			# jesli nie ma takiej gry w bazie to ja pomin
-			if not SteamGame.objects.filter(appid=game['appid']):
-				continue
-			
-			game_in_db = SteamGame.objects.filter(appid=game['appid'])[:1].get()
-			
-			# jesli gra nie ma ikonki to ja dodaj
-			if game_in_db.img_icon_url == '0':
-				game_in_db.img_icon_url = game['img_icon_url']
-			
-			# jesli gracz nie ma przypisanej danej gry to ja przypisz
-			if steam_user not in game_in_db.owners.all():
-				game_in_db.owners.add(steam_user)
-			
-			# zapisz gre
-			game_in_db.save()
+		if owned_games_list:
+			for game in owned_games_list:
+				# jesli nie ma takiej gry w bazie to ja pomin
+				if not SteamGame.objects.filter(appid=game['appid']):
+					continue
+				
+				game_in_db = SteamGame.objects.filter(appid=game['appid'])[:1].get()
+				
+				# jesli gra nie ma ikonki to ja dodaj
+				if game_in_db.img_icon_url == '0':
+					game_in_db.img_icon_url = game['img_icon_url']
+				
+				# jesli gracz nie ma przypisanej danej gry to ja przypisz
+				if steam_user not in game_in_db.owners.all():
+					game_in_db.owners.add(steam_user)
+				
+				# zapisz gre
+				game_in_db.save()
 			
 	else:
 		logger.info('jeszcze tylko ' + str(3600 - int(time_diff.total_seconds())) + ' sekund do mozliwosci odswiezenia')

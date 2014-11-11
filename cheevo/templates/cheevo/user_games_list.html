@@ -20,16 +20,22 @@
 
 	<div id="game-list">
 		<ul>
-			{% for game in games %}
-				<li class="game-entry">
-					<a href="https://steamcommunity.com/stats/{{ game.appid }}/achievements/">
-						<div class="game-entry-wrapper">
-							<img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{ game.appid }}/{{ game.img_icon_url }}.jpg">
-							{{ game.title }}
-						</div>
-					</a>
-				</li>
-			{% endfor %}
+			{% if games %}
+				{% for game in games %}
+					<li class="game-entry">
+						<a href="https://steamcommunity.com/stats/{{ game.appid }}/achievements/">
+							<div class="game-entry-wrapper">
+								<img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{ game.appid }}/{{ game.img_icon_url }}.jpg">
+								{{ game.title }}
+							</div>
+						</a>
+					</li>
+				{% endfor %}
+			{% else %}
+				<div style="text-align: center;">
+					<h1 style="font-size: 32px;">You don't have any games with achievements<br/>or your profile is set to private.</h1>
+				</div>
+			{% endif %}
 		</ul>
 	</div>
 
