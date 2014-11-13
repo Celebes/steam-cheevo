@@ -256,7 +256,7 @@ def reload_all_achievements(request):
 			# przypisz osiagniecia do gier, o ile juz nie sa przypisane i jesli gra ma osiagniecia
 			if list_of_achievements:
 			
-				min_ach = 100.0
+				min_ach = 101.0
 				below_one_count = 0
 				
 				for achievement in list_of_achievements:
@@ -270,6 +270,9 @@ def reload_all_achievements(request):
 						
 					if curr_percent < 1:
 						below_one_count += 1
+				
+				if min_ach == 101.0:
+					min_ach = 0;
 				
 				steamGame.min_achievement = min_ach
 				steamGame.below_one_ach_count = below_one_count
